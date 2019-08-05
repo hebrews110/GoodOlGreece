@@ -9988,7 +9988,7 @@ body, html {
   width: calc(100% - 1rem);
 }
 
-.noselect, .finder-buttons button img, .dragtargets-div .drag-item {
+.noselect, .finder-buttons button img, .target > span, .dragtargets-div .drag-item {
   -webkit-touch-callout: none;
   /* iOS Safari */
   -webkit-user-select: none;
@@ -10002,6 +10002,10 @@ body, html {
   user-select: none;
   /* Non-prefixed version, currently
      supported by Chrome and Opera */
+}
+
+#question-dialog.modal {
+  position: absolute;
 }
 
 .target {
@@ -10111,6 +10115,9 @@ body, html {
   align-items: center;
   align-content: center;
   border: none;
+  filter: none;
+}
+.finder-buttons button.was_found {
   filter: grayscale(100%);
 }
 .finder-buttons button img {
@@ -10125,10 +10132,6 @@ body, html {
 }
 .finder-buttons button:not(:hover) {
   background-color: #eeeeee !important;
-}
-.finder-buttons button:hover {
-  filter: none;
-  transition: all 0.5s ease;
 }
 
 .se-pre-con {

@@ -118,8 +118,9 @@ namespace GameTools {
     }
     export class InfoBox extends DisplayedItem {
         private modalDisplayed = false;
+        public static readonly defaultDelay = 1000;
         private wantsToRedisplay = false;
-        constructor(protected title: GameString, protected text: GameString, protected buttonText: GameString = "OK") {
+        constructor(protected title: GameString, protected text: GameString, protected buttonText: GameString = "OK", protected delay = InfoBox.defaultDelay) {
             super();
         }
         protected dialogCreated(): void {
@@ -189,7 +190,7 @@ namespace GameTools {
                             this.displayNext();
                 });
                 
-           }, 1000);
+           }, this.delay);
         }
     }
 
@@ -491,12 +492,17 @@ namespace GameTools {
                     "top": "",
                     "left": ""
                 });
-                $draggable.detach().appendTo($(this));
+                var $newParent = $(this);
+                if($(this).hasClass("target") && $(this).find(".drag-item").length != 0) {
+                    $newParent = $itemsDiv;
+                }
+                $draggable.detach().appendTo($newParent);
                 console.log(this);
-                if($(this).is($itemsDiv))
+                if($newParent.is($itemsDiv))
                     $draggable.css({ "position": "relative"});
             };
             let outFunction = function (event, ui) {
+                console.log("out");
                 if($(this).hasClass("target") && $(this).children(".drag-item").hasClass("ui-draggable-dragging")) {
                     console.log($(this).children().get(0));
                     $(this).children("i").hide();
@@ -508,6 +514,7 @@ namespace GameTools {
                 containment: $('body'),
                 start: function (event, ui) {
                     $(ui.helper).css({ "transform": "none"});
+                    $(this).data("startingScrollTop",$(this).parent().scrollTop());
                     
                 },
                 revert: function (droppable) {
@@ -526,9 +533,10 @@ namespace GameTools {
                 },
                 stop: function (event, ui) {
                     $(ui.helper).css({ "transform": ""});
-                }
+                },
+                scroll: false,
             };
-            
+            console.log("should not scroll");
             $targetsDiv.children("div").droppable().on("drop", dropFunction).on("dropout", outFunction).on("gt.before_drop", gtBeforeDropFunction);
             $itemsDiv.droppable().on("drop", dropFunction).on("dropout", outFunction);
             $itemsDiv.children("div").draggable(dragInfo);
@@ -607,8 +615,9 @@ namespace GameTools {
     export class Finder {
         public itemsFound: number;
         private itemIndexes: any[] = [];
+        public static readonly defaultKeyword = "found";
         public $componentFound: JQuery;
-        constructor(public parent: DisplayedItem, public numItems: number) {
+        constructor(public parent: DisplayedItem, public numItems: number, public keyword = Finder.defaultKeyword) {
             this.reset();
         }
         reset(): void {
@@ -617,7 +626,7 @@ namespace GameTools {
         }
         setTitle(): void {
             if(this.itemsFound > 0)
-                $("#question-dialog .modal-title").text("You have found " + this.itemsFound + " of " + this.numItems + " items.");
+                $("#question-dialog .modal-title").text("You have " + this.keyword + " " + this.itemsFound + " of " + this.numItems + " items.");
         }
         itemFound($component: JQuery<any>): void {
             
@@ -651,14 +660,18 @@ namespace GameTools {
     export class ButtonFinder extends InfoBox {
         finder: Finder;
         didDisplay = false;
-        constructor(title: GameString, public instructions: GameString, public buttons: (GameString)[]) {
-            super(title, instructions, null);
-            this.finder = new Finder(this, buttons.length);
+        foundIndexes: number[];
+        constructor(title: GameString, public instructions: GameString, public buttons: (GameString)[], public delay = InfoBox.defaultDelay) {
+            super(title, instructions, null, delay);
+            this.finder = new Finder(this, buttons.length, "explored");
+            this.foundIndexes = [];
         }
         reset(): void {
             if(this.finder != null)
                 this.finder.reset();
             super.reset();
+            this.foundIndexes = [];
+            this.didDisplay = false;
         }
         displayNext(): void {
             if(this.didDisplay)
@@ -688,12 +701,15 @@ namespace GameTools {
             this.finder.setTitle();
             var $finderButtons = $("<div></div>").addClass("finder-buttons").appendTo($body);
             this.buttons.forEach((element, index) => {
-  
                 var $button = $("<button></button>").html(element.string_val());
-                
+                if(this.foundIndexes.indexOf(index) != -1) {
+                    $button.addClass("was_found");
+                }
                 $button.data("index", index);
+                $button.data("element", element);
                 $button.click((e) => {
                     $finderButtons.children("button").prop("disabled", true);
+                    this.foundIndexes.push($(e.target).data("index"));
                     this.finder.itemFound($(e.target));
                 });
                 $finderButtons.append($button);
@@ -763,6 +779,24 @@ namespace GameTools {
             });
         }
     }
+    export function monkeyPatch() {
+        $.widget("ui.draggable", ($.ui as any).draggable, {
+
+            _mouseStart: function(event) {
+              this._super(event);
+              this.origScroll = this.options.scroll;
+              if (this.cssPosition==="fixed" || this.hasFixedAncestor) {
+                this.options.scroll = false;
+              }
+            },
+        
+            _mouseStop: function(event) {
+              this._super(event);
+              this.options.scroll = this.origScroll;
+            }
+        
+        });
+    }
 }
 
 class GreeceInteractiveMap extends GameTools.InteractiveSVG {
@@ -796,7 +830,7 @@ let sparta: string[] = [
 GameTools.gameContents = [
     new GameTools.InfoBox("Welcome!", "Welcome to Good Ol' Greece.<p></p>If you're playing on a small device, we recommend using landscape for some or all of the parts in this game."),
     new GameTools.Label("dragquestion"),
-    new GameTools.DragTargetsQuestion("Can you put these in order?", [
+    new GameTools.DragTargetsQuestion("Place the dates on top of their matching event.", [
         { name: "1852 B.C.", target: "Pyramids begin to be built" },
         { name: "500 B.C.", target: "Greek Classical Age" },
         { name: "0 B.C./A.D.", target: "Christ is born" },
@@ -815,6 +849,7 @@ GameTools.gameContents = [
     new GreeceInteractiveMap("Select the continent Greece is in.", "Continents.svg", [
         ".interactive-continent"
     ]),
+    new GameTools.InfoBox("Nice work!", "Greece is located in southern Europe.", "OK"),
     new GameTools.Label("second-map"),
     new GameTools.ButtonFinder("Athens: Explore the items!", null, [
         GameTools.imageAndText("raising_hand.png", "Democracy"),
@@ -825,11 +860,11 @@ GameTools.gameContents = [
         GameTools.imageAndText("youngboy.gif", "Young boy"),
         GameTools.imageAndText("house.gif", "House"),
         GameTools.imageAndText("tree.png", "Olive tree")
-    ]),
+    ], 0),
     new GameTools.Condition(new GameTools.Loop({ index: "third-map" }), new GameTools.Label("fallthrough")),
     new GameTools.InfoBox("Information", { string_val: function() {
         return athens[GameTools.lastData];
-    }}, "OK"),
+    }}, "OK", 0),
     new GameTools.Loop({ index: "second-map"}),
     new GameTools.Label("third-map"),
     new GameTools.ButtonFinder("Sparta: Explore the items!", null, [
@@ -839,11 +874,11 @@ GameTools.gameContents = [
         GameTools.imageAndText("babies.jpg", "Spartan babies"),
         GameTools.imageAndText("youngboy.gif", "Spartan boys"),
         GameTools.imageAndText("stealing.jpg", "Stealing")
-    ]),
+    ], 0),
     new GameTools.Condition(new GameTools.Loop({ index: "fourth-map" }), new GameTools.Label("fallthrough")),
     new GameTools.InfoBox("Information", { string_val: function() {
         return sparta[GameTools.lastData];
-    }}, "OK"),
+    }}, "OK", 0),
     new GameTools.Loop({ index: "third-map"}),
     new GameTools.Label("fourth-map"),
     new GameTools.DragTargetsQuestion("Mount Olympus: Match the symbols to the gods and goddesses.", [
@@ -926,6 +961,7 @@ GameTools.gameContents = [
 ];
 $(window).on("load", function() {
     $(".se-pre-con").fadeOut("slow");
+    GameTools.monkeyPatch();
     GameTools.resetSystem();
     GameTools.restart();
 });
