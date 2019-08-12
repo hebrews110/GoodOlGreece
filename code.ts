@@ -511,10 +511,9 @@ namespace GameTools {
                 }
             };
             let dragInfo: JQueryUI.DraggableOptions = {
-                containment: $('body'),
+                containment: $("body"),
                 start: function (event, ui) {
                     $(ui.helper).css({ "transform": "none"});
-                    $(this).data("startingScrollTop",$(this).parent().scrollTop());
                     
                 },
                 revert: function (droppable) {
@@ -534,9 +533,9 @@ namespace GameTools {
                 stop: function (event, ui) {
                     $(ui.helper).css({ "transform": ""});
                 },
-                scroll: false,
+                scroll: true
             };
-            console.log("should not scroll");
+            console.log("should scroll");
             $targetsDiv.children("div").droppable().on("drop", dropFunction).on("dropout", outFunction).on("gt.before_drop", gtBeforeDropFunction);
             $itemsDiv.droppable().on("drop", dropFunction).on("dropout", outFunction);
             $itemsDiv.children("div").draggable(dragInfo);
