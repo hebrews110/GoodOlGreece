@@ -10126,9 +10126,8 @@ body, html {
   min-height: 0;
   min-width: 0;
   max-width: 100%;
-  max-height: 100%;
+  max-height: 90%;
   object-fit: contain;
-  display: block;
 }
 .finder-buttons button:not(:hover) {
   background-color: #eeeeee !important;
