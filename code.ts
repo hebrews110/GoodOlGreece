@@ -827,6 +827,7 @@ let sparta: string[] = [
     "Spartan boys were deliberately kept hungry, so they had to roam around stealing food to survive. This taught them useful skills for battle."
 ];
 GameTools.gameContents = [
+    new GameTools.Loop({ index: "second-map"}),
     new GameTools.InfoBox("Welcome!", "Welcome to Good Ol' Greece.<p></p>If you're playing on a small device, we recommend using landscape for some or all of the parts in this game."),
     new GameTools.Label("dragquestion"),
     new GameTools.DragTargetsQuestion("Place the dates on top of their matching event.", [

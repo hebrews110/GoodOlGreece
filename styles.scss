@@ -227,7 +227,6 @@ $btn-height: 6rem;
         @extend .shadow;
         margin: 1rem 0.5rem;
         min-width: 3cm;
-        max-height: 6cm;
         flex: 0 1 25%;
         display: inline-flex;
         flex-direction: column;
@@ -248,6 +247,8 @@ $btn-height: 6rem;
             min-width: 0;
             max-width: 100%;
             max-height: 90%;
+            height: 5cm;
+            display: block;
             object-fit: contain;
         }
     }
