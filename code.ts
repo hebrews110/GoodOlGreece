@@ -22,17 +22,17 @@ namespace GameTools {
             return this.each(function() {
                 var $this = $(this);
                 var elems = $this.children(childElem);
-    
+
                 shuffle(elems);
-    
+
                 elems.each(function() {
                     $(this).detach();
                 });
-    
+
                 for(var i=0; i < elems.length; i++) {
-                    $this.append(elems[i]);      
+                    $this.append(elems[i]);
                 }
-            });    
+            });
         }
     })(jQuery);
     export let currentLevel = 0;
@@ -179,7 +179,7 @@ namespace GameTools {
                 $("#question-dialog").modal( { backdrop: "static" });
                 this.modalDisplayed = true;
                 $("#question-dialog").one("shown.bs.modal", (): void => {
-                    
+
                 });
                 $("#question-dialog").one("hidden.bs.modal", (): void => {
                         this.modalDisplayed = false;
@@ -189,7 +189,7 @@ namespace GameTools {
                         else
                             this.displayNext();
                 });
-                
+
            }, this.delay);
         }
     }
@@ -213,7 +213,7 @@ namespace GameTools {
             let $container = $("<div></div>");
             $container.addClass("level-buttons");
             this.levelMarkups.forEach((element, index) => {
-                
+
                 let $button = $("<button></button>");
                 $button.html(element.string_val());
                 $button.data("level-id", index);
@@ -248,7 +248,7 @@ namespace GameTools {
         } else
             cb();
     }
-    
+
     export class Label extends GameTools.DisplayedItem {
         constructor(public name: GameString) {
             super();
@@ -262,7 +262,7 @@ namespace GameTools {
         relative?: boolean;
     }
     export class Loop extends GameTools.DisplayedItem {
-        
+
         private numLoops = 0;
         constructor(public loopInfo: LoopInfo, public times = -1) {
             super();
@@ -282,7 +282,7 @@ namespace GameTools {
         }
         display(): void {
             if(this.times < 0 || this.numLoops < this.times) {
-                
+
                 if(typeof this.loopInfo.index == "number") {
                     if(this.loopInfo.relative && this.myIndex() == -1)
                         throw "Not in gameContents array, cannot use relative branch";
@@ -352,14 +352,14 @@ namespace GameTools {
     export function HSLToHex(h,s,l) {
         s /= 100;
         l /= 100;
-      
+
         let c = (1 - Math.abs(2 * l - 1)) * s,
             x = c * (1 - Math.abs((h / 60) % 2 - 1)),
             m = l - c/2,
             r: string | number = 0,
             g: string | number = 0,
             b: string | number = 0;
-      
+
         if (0 <= h && h < 60) {
           r = c; g = x; b = 0;
         } else if (60 <= h && h < 120) {
@@ -377,7 +377,7 @@ namespace GameTools {
         r = Math.round((r + m) * 255).toString(16);
         g = Math.round((g + m) * 255).toString(16);
         b = Math.round((b + m) * 255).toString(16);
-      
+
         // Prepend 0s, if necessary
         if (r.length == 1)
           r = "0" + r;
@@ -385,7 +385,7 @@ namespace GameTools {
           g = "0" + g;
         if (b.length == 1)
           b = "0" + b;
-      
+
         return "#" + r + g + b;
     }
     export function getContrastYIQ(hexcolor){
@@ -430,7 +430,7 @@ namespace GameTools {
                 "height": "100%"
             });
             $("#question-dialog .modal-body").append($containerDiv);
-            
+
             $bothDivs.addClass("dragtargets-div");
             $targetsDiv.addClass("targets-div");
             $itemsDiv.addClass("items-div");
@@ -469,7 +469,7 @@ namespace GameTools {
                 ($targetsDiv as any).randomize();
             if(this.shuffleOptions)
                 ($itemsDiv as any).randomize();
-             
+
             let gtBeforeDropFunction = function (event, ui) {
                 console.log("gt before drop");
                 if($(this).hasClass("target")) {
@@ -514,7 +514,7 @@ namespace GameTools {
                 containment: $("body"),
                 start: function (event, ui) {
                     $(ui.helper).css({ "transform": "none"});
-                    
+
                 },
                 revert: function (droppable) {
                     if(!droppable) {
@@ -599,7 +599,7 @@ namespace GameTools {
                                 this.interactiveComponentClicked(($(e.target) as JQuery<Element>) as JQuery<SVGElement>);
                             });
                         });
-                        
+
                     });
             });
             $("#question-dialog .modal-body").append($svgContainer);
@@ -628,7 +628,7 @@ namespace GameTools {
                 $("#question-dialog .modal-title").text("You have " + this.keyword + " " + this.itemsFound + " of " + this.numItems + " items.");
         }
         itemFound($component: JQuery<any>): void {
-            
+
             if(this.itemIndexes.indexOf($component.data("index")) == -1) {
                 this.itemsFound++;
                 this.itemIndexes.push($component.data("index"));
@@ -728,7 +728,7 @@ namespace GameTools {
                 GameTools.lastResult = isTrue == this.correctAnswer;
             } else
                 GameTools.lastResult = isTrue;
-           
+
             super.buttonCallback(e);
         }
         dialogCreated(): void {
@@ -788,12 +788,12 @@ namespace GameTools {
                 this.options.scroll = false;
               }
             },
-        
+
             _mouseStop: function(event) {
               this._super(event);
               this.options.scroll = this.origScroll;
             }
-        
+
         });
     }
 }
@@ -900,7 +900,7 @@ GameTools.gameContents = [
     new GameTools.Label("quiz"),
     new GameTools.InfoBox("Great job!", "The gods are pleased.", "OK"),
     new GameTools.InfoBox("Welcome to the Quiz", "Now you'll be tested on your knowledge of Athens, Sparta, and Mount Olympus."),
-    new GameTools.MultipleChoiceQuestion("At what age did boys from Sparta start going to school?", [
+    new GameTools.MultipleChoiceQuestion("At what age did boys from Sparta start military training?", [
         { html: "7", correct: true},
         { html: "16" },
         { html: "They didn't!" }
